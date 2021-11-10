@@ -14,8 +14,9 @@ horizontal_filter = np.array(
 
 
 #path = "C:/Users/hilde/source/repos/Sobel_1/5x10_l-shape.png"
-#path = r"C:\Users\sebas\OneDrive - Technische Hochschule Nürnberg Georg Simon Ohm\Desktop\TH-Nürnberg\Sem3\Sim\Geradenerkennung\450x450_blcksqr.png" 
-path = "C:/Users/hilde/source/repos/Sobel_1/sw_Quadrat-voll.jpg"
+#path = r"C:\Users\sebas\OneDrive - Technische Hochschule Nürnberg Georg Simon Ohm\Desktop\TH-Nürnberg\Sem3\Sim\Geradenerkennung\100x100_blacksq.png" 
+path = r"C:\Users\Sebastian\OneDrive - Technische Hochschule Nürnberg Georg Simon Ohm\Desktop\TH-Nürnberg\Sem3\Sim\Geradenerkennung\rgb.png"
+#path = "C:/Users/hilde/source/repos/Sobel_1/sw_Quadrat-voll.jpg"
 #path = "C:/Users/hilde/source/repos/Sobel_1/Ohm.png"
 
 
@@ -78,7 +79,7 @@ def Sobelfilter():
     print(sobelArr_vert)
 
 
-    sobelArr = np.hypot(sobelArr_vert, sobelArr_hor)      #Hypothenuse -> Pythagoras, zu vereinfacht?  #python shorct punktweise op  hypot unnötig
+    sobelArr = np.hypot(sobelArr_vert, sobelArr_hor)      #Hypothenuse!!!!! brauchen wir ned? -> Pythagoras, zu vereinfacht?  #python shorct punktweise op  hypot unnötig
         
 
     maxi = sobelArr.max()
@@ -90,18 +91,18 @@ def Sobelfilter():
 
 
     
-    sobelArr_vert = abs(sobelArr_vert)
-    maxivert = sobelArr_vert.max()
-    sobelArr_vert = sobelArr_vert/maxivert
-    sobelArr_vert = sobelArr_vert * 255
-    Image.fromarray(sobelArr_vert).show()
+    # sobelArr_vert = abs(sobelArr_vert)
+    # maxivert = sobelArr_vert.max()
+    # sobelArr_vert = sobelArr_vert/maxivert
+    # sobelArr_vert = sobelArr_vert * 255
+    # Image.fromarray(sobelArr_vert).show()
 
 
-    sobelArr_hor = abs(sobelArr_hor)
-    maxihor = sobelArr_hor.max()
-    sobelArr_hor = sobelArr_hor/maxihor
-    sobelArr_hor = sobelArr_hor * 255
-    Image.fromarray(sobelArr_hor).show()
+    # sobelArr_hor = abs(sobelArr_hor)
+    # maxihor = sobelArr_hor.max()
+    # sobelArr_hor = sobelArr_hor/maxihor
+    # sobelArr_hor = sobelArr_hor * 255
+    # Image.fromarray(sobelArr_hor).show()
 
 
     endimage = Image.fromarray(sobelArr)
@@ -111,16 +112,21 @@ def Sobelfilter():
 
 
 def Houghtrans(Arr):                     #xcos(phi) + ysin(phi) = d
-    inkr_phi = 30                  
-    #phi = 360/inkr_phi
+    inkr_phi = 400            
+    inkr_phi_distance = 180/inkr_phi
+    phi_Vektor= np.zeros((inkr_phi))
+
+    inkr_d = 500
+    #d_Vektor = 
 
     d_max = np.hypot(height,width)       #x-Achse: d  |  y-Achse: phi
-    inkr_d = int(np.ceil(d_max))         #unnötig aufzurunden? eig kann unten keine kante sein
+    inkr_distance = d_max/inkr_d
+    #inkr_d = int(np.ceil(d_max))         #unnötig aufzurunden? eig kann unten keine kante sein
 
     schwell =  150                       #!!!! eigentlich auf die nicht normierte Map zugreifen -> problem mit global variable
 
 
-    hRoom = np.zeros((int(360/10),inkr_d))    #nicht inkr_phi statt 10?
+    hRoom = np.zeros((inkr_phi,inkr_d))    #nicht inkr_phi statt 10?
 
     for y in range(1, height-1):              #Ränder werden ausgelassen -> enthalten "eh" keine kanten
         for x in range(1, width-1):
@@ -129,20 +135,33 @@ def Houghtrans(Arr):                     #xcos(phi) + ysin(phi) = d
                 phi=0
                 s = 0                         #evtl Zähler als Math. Gleichung für den Zugriff auf 2d array umschreiben
                 
-                while(phi != 360.0):           
-                    d = int( np.round( x*np.cos(phi) + y*np.sin(phi) ) )
+                while(s!=inkr_phi-1):          #Aufgrund der kleinen Abstände ergeben sich Rundungsfehler -> der exakte Wert 360 wird nie erreicht 
+
+                    d = int( np.round( (x*np.cos(phi) + y*np.sin(phi)) / inkr_distance ) )
+                    
 
                     hRoom[s][d]=  hRoom[s][d] + 1               #Matrix-Indexer fragen?
-                    s = s + 1
+                    
+                    phi_Vektor[s] = phi                         #???
 
-                    phi = phi+(360.0/inkr_phi)                  #phis und d in Vektoren übertragen
+                    phi = phi+inkr_phi_distance                 #phis und d in Vektoren übertragen
+
+                    s = s + 1
 
 
     
     hRoom = hRoom/hRoom.max()
     hRoom = hRoom*255
-    Image.fromarray(hRoom).show()
 
+    Image.fromarray(hRoom).show()
+    RedLine(hRoom, inkr_d, inkr_phi)
+
+
+def RedLine(hRoom, inkr_d, inkr_phi):
+    for s in range(0, inkr_phi-1):
+        for d in range(0,inkr_d-1):
+            if(hRoom[s][d] >= 150):
+                redArr = np.zeros((height,width))           #hier irgendwie Linien eintragen.
 
 
 
