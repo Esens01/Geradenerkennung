@@ -15,7 +15,7 @@ horizontal_filter = np.array(
 
 #path = "C:/Users/hilde/source/repos/Sobel_1/5x10_l-shape.png"
 #path = r"C:\Users\sebas\OneDrive - Technische Hochschule Nürnberg Georg Simon Ohm\Desktop\TH-Nürnberg\Sem3\Sim\Geradenerkennung\100x100_blacksq.png" 
-path = r"C:\Users\Sebastian\OneDrive - Technische Hochschule Nürnberg Georg Simon Ohm\Desktop\TH-Nürnberg\Sem3\Sim\Geradenerkennung\rgb.png"
+path = r"C:\Users\Sebastian\OneDrive - Technische Hochschule Nürnberg Georg Simon Ohm\Desktop\TH-Nürnberg\Sem3\Sim\Geradenerkennung\100x100_blacksq.png"
 #path = "C:/Users/hilde/source/repos/Sobel_1/sw_Quadrat-voll.jpg"
 #path = "C:/Users/hilde/source/repos/Sobel_1/Ohm.png"
 
@@ -27,7 +27,7 @@ map = np.asarray(img)                   #Grauwerte als 2D-Array
 map = map/255.0                         #Werte durch 255 teilen, sodass 1 größtmöglicher Wert ist (zwischen 0(w) und 1(sw))
 
 
-print(map)
+#print(map)
 
 width, height = img.size
 
@@ -57,36 +57,36 @@ def Sobelfilter():
 
     for r in range(1, height-1):              #überprüfen welche Zahl (vordere oder hintere die breite/höhe ist) -> muss ich bei 1 oder 3 starten?
         for c in range(1, width-1):           #r:Zeilen, c:Spalten          #evtl Rand mit anderem Filter mit einbringen
-            localArr = map[r-1:r+2, c-1:c+2]  #Ränder weglassen, von r-1 bis r+1 laufen (Endwert nicht drin)
+            localArr = map[r-1:r+2, c-1:c+2]  #Ränder weglassen, von r-1 bis r+1 laufen (Endwert nicht drin) -> indexer so richtig?
 
             tempVal = 0                       #tempVal muss hier stehen
             for i in range(0,3):              #evtl schöner zusammen schreiben?  0 li v akt Zelle?
                 for j in range(0,3):          #dauert sehr lange zum rechnen -> evtl eine integrierte Methode zum verrechnen?
                     
                     tempVal = tempVal + (vertical_filter[i][j] * localArr[i][j])   #hier werden beide Sobel-F. angewendet
-            sobelArr_vert[r,c] = tempVal
+            sobelArr_vert[r][c] = tempVal
 
             tempVal = 0
             for i in range(0,3):
                 for j in range(0,3):
                     
                     tempVal = tempVal + (horizontal_filter[i][j] * localArr[i][j])
-            sobelArr_hor[r,c] = tempVal
+            sobelArr_hor[r][c] = tempVal
 
 
 
-    print(sobelArr_hor)
-    print(sobelArr_vert)
+    #print(sobelArr_hor)        #zwischenzeitliches Sobelarray ausgeben
+    #print(sobelArr_vert)
 
 
     sobelArr = np.hypot(sobelArr_vert, sobelArr_hor)      #Hypothenuse!!!!! brauchen wir ned? -> Pythagoras, zu vereinfacht?  #python shorct punktweise op  hypot unnötig
         
 
     maxi = sobelArr.max()
-    print(maxi)
+#    print(maxi)
     sobelArr=sobelArr / maxi                 #damit alle Werte unter 1 normiert werden -> sodass ich sie später wieder hochskalieren kann
     sobelArr=sobelArr*255
-    print(sobelArr)
+#    print(sobelArr)
 
 
 
@@ -112,35 +112,42 @@ def Sobelfilter():
 
 
 def Houghtrans(Arr):                     #xcos(phi) + ysin(phi) = d
-    inkr_phi = 400            
+    inkr_phi = 400           
     inkr_phi_distance = 180/inkr_phi
     phi_Vektor= np.zeros((inkr_phi))
 
-    inkr_d = 500
+    inkr_d = 200
     #d_Vektor = 
 
-    d_max = np.hypot(height,width)       #x-Achse: d  |  y-Achse: phi
-    inkr_distance = d_max/inkr_d
+    d_max = np.hypot(height,width)       #x-Achse: d  |  y-Achse: phi  ???muss hier height -1 und width -1 gewählt werden?
+    inkr_distance = d_max/ inkr_d
     #inkr_d = int(np.ceil(d_max))         #unnötig aufzurunden? eig kann unten keine kante sein
 
     schwell =  150                       #!!!! eigentlich auf die nicht normierte Map zugreifen -> problem mit global variable
 
 
-    hRoom = np.zeros((inkr_phi,inkr_d))    #nicht inkr_phi statt 10?
+    hRoom = np.zeros((inkr_phi, inkr_d * 2 ))    #nicht inkr_phi statt 10?  #doppelte Länge, sodass alle negativen und positiven d werte erfasst werden 
 
     for y in range(1, height-1):              #Ränder werden ausgelassen -> enthalten "eh" keine kanten
         for x in range(1, width-1):
-            if(Arr[y,x] >= schwell):
+            if(Arr[y][x] >= schwell):
 
-                phi=0
+                phi=-90.0
                 s = 0                         #evtl Zähler als Math. Gleichung für den Zugriff auf 2d array umschreiben
                 
                 while(s!=inkr_phi-1):          #Aufgrund der kleinen Abstände ergeben sich Rundungsfehler -> der exakte Wert 360 wird nie erreicht 
+                    
+                    d =x*np.cos(phi * (np.pi/180) ) + y*np.sin(phi  * (np.pi/180)  )
 
-                    d = int( np.round( (x*np.cos(phi) + y*np.sin(phi)) / inkr_distance ) )
+                    if(d == d_max):
+                        print()
+
+                    d=int(np.round(  d/inkr_distance  +  inkr_d   ))            #x-Verschiebung mit +inkr_d
+                    
+                    #d = int( np.round( (x*np.cos(phi) + y*np.sin(phi)) / inkr_distance ) )
                     
 
-                    hRoom[s][d]=  hRoom[s][d] + 1               #Matrix-Indexer fragen?
+                    hRoom[s][d]=  hRoom[s][d] + 1               #das + wird benötigt um den x-0 punkt auf die mitte der x-Achse des HRaums zu verschieben             #Matrix-Indexer fragen? 
                     
                     phi_Vektor[s] = phi                         #???
 
@@ -149,9 +156,23 @@ def Houghtrans(Arr):                     #xcos(phi) + ysin(phi) = d
                     s = s + 1
 
 
+
     
-    hRoom = hRoom/hRoom.max()
+    hRoom = hRoom / hRoom.max()
     hRoom = hRoom*255
+    
+
+    #testcode
+    # for y in range(0, inkr_phi-1):              #Ränder werden ausgelassen -> enthalten "eh" keine kanten
+    #     for x in range(0, inkr_d-1):
+    #         if(hRoom[y][x] > 0 ):
+    #             hRoom[y][x] = 255
+
+    
+
+    #testcode
+    hRoom = np.swapaxes(hRoom,0,1)
+
 
     Image.fromarray(hRoom).show()
     RedLine(hRoom, inkr_d, inkr_phi)
@@ -167,6 +188,12 @@ def RedLine(hRoom, inkr_d, inkr_phi):
 
 if __name__ == '__main__':
      main()
+
+
+
+
+
+
 
 
 
