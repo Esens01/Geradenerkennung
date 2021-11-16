@@ -2,7 +2,6 @@ from PIL import Image, ImageOps, ImageFilter, ImageDraw
 import PIL
 import numpy as np
 
-from scipy import signal
 
 
 
@@ -18,7 +17,7 @@ horizontal_filter = np.array(
 
 #path = "C:/Users/hilde/source/repos/Sobel_1/5x10_l-shape.png"
 #path = r"C:\Users\sebas\OneDrive - Technische Hochschule Nürnberg Georg Simon Ohm\Desktop\TH-Nürnberg\Sem3\Sim\Geradenerkennung\100x100_blacksq.png" 
-path = r"C:\Users\sebas\OneDrive - Technische Hochschule Nürnberg Georg Simon Ohm\Desktop\TH-Nürnberg\Sem3\Sim\Geradenerkennung\100x100_blacksq.png"
+path = r"C:\Users\Sebastian\OneDrive - Technische Hochschule Nürnberg Georg Simon Ohm\Desktop\TH-Nürnberg\Sem3\Sim\Geradenerkennung\100x100_blacksq.png"
 #path = "C:/Users/hilde/source/repos/Sobel_1/sw_Quadrat-voll.jpg"
 #path = "C:/Users/hilde/source/repos/Sobel_1/Ohm.png"
 
@@ -115,7 +114,7 @@ def Sobelfilter():
 
 
 def Houghtrans(Arr):                     #xcos(phi) + ysin(phi) = d
-    inkr_phi = 40         
+    inkr_phi = 400         
     inkr_phi_distance = (180/inkr_phi) 
     phi_Vektor= np.zeros((inkr_phi))
     phi = -90
@@ -126,7 +125,7 @@ def Houghtrans(Arr):                     #xcos(phi) + ysin(phi) = d
     
     #phi_testvekt = np.linspace(0,  180/inkr_phi, num = inkr_phi)
 
-    inkr_d = 20
+    inkr_d = 200
     d_max = np.hypot(height,width)       #x-Achse: d  |  y-Achse: phi  ???muss hier height -1 und width -1 gewählt werden?
     inkr_distance = d_max/ inkr_d
 
@@ -188,6 +187,8 @@ def Houghtrans(Arr):                     #xcos(phi) + ysin(phi) = d
 
     himage = Image.fromarray(hRoom)
     himage.show()
+    himage = himage.convert("RGB")
+    himage.save(r"C:\Users\Sebastian\OneDrive - Technische Hochschule Nürnberg Georg Simon Ohm\Desktop\TH-Nürnberg\Sem3\Sim\Geradenerkennung\hRoom.jpg")
 
 
 
@@ -195,11 +196,11 @@ def Houghtrans(Arr):                     #xcos(phi) + ysin(phi) = d
     #find local maxima
 
 
-    peaks = [[]]
-    for s in range(1, inkr_phi-1):              #s = phi    |  d =
-        for d in range(0,inkr_d-1):           
+    peaks = []
+    for s in range(0, inkr_phi-1):              #s = phi    |  d =
+        for d in range(0,inkr_d-1):             # bei 0 starten oder bei 1
 
-            if(hRoom[s][d] >= (80) ):
+            if(hRoom[s][d] >= 40 ):
 
                 dere = hRoom[s][d]
 
@@ -292,10 +293,19 @@ def Houghtrans(Arr):                     #xcos(phi) + ysin(phi) = d
 
                 
 
-                if((not peaks) or not([stemp,dtemp] in peaks) ):
+                if( (len(peaks)==0) or not ([stemp,dtemp] in peaks) ):
 
-                    #temppeak = [(stemp,dtemp)]
-                    peaks = peaks.append([stemp, dtemp])                    #======wie ein tupelarray?
+                    breakstate = False
+                    for yprev,xprev in peaks:
+                        
+                        vectY = yprev - stemp
+                        vectX =xprev - dtemp
+                        if( np.hypot(vectY,vectX) < (inkr_phi/10) ):
+                            breakstate = True
+
+                    if(breakstate):
+                        break
+                    peaks = peaks + [[stemp,dtemp]]
 
 
                     x0 = (dtemp-inkr_d)*inkr_distance  * np.cos(phi_Vektor[stemp])
@@ -317,6 +327,8 @@ def Houghtrans(Arr):                     #xcos(phi) + ysin(phi) = d
                     redImg = ImageDraw.Draw(origImg)
                     redImg.line(((x1,y1),(x2,y2)), fill="red", width = 4 )
                     origImg.show()
+            
+    print("swew")
 
                 
 
@@ -344,31 +356,31 @@ def Houghtrans(Arr):                     #xcos(phi) + ysin(phi) = d
    
     
 
-    for s in range(1, inkr_phi-1):              #s = phi    |  d =
-        for d in range(0,inkr_d-1):           
+    # for s in range(1, inkr_phi-1):              #s = phi    |  d =
+    #     for d in range(0,inkr_d-1):           
 
-            if(hRoom[s][d] >= 125):
-
-
-                x0 = (d-inkr_d)*inkr_distance  * np.cos(phi_Vektor[s])
-                y0 = (d-inkr_d)*inkr_distance  * np.sin(phi_Vektor[s])
+    #         if(hRoom[s][d] >= 125):
 
 
-                x1 = np.round( x0 + d_max*np.sin(phi_Vektor[s]))
-                y1 = np.round( y0 + d_max*np.cos(phi_Vektor[s]))
-
-                x2 = np.round( x0 - d_max*np.sin(phi_Vektor[s]))
-                y2 = np.round( y0 - d_max*np.cos(phi_Vektor[s]))
+    #             x0 = (d-inkr_d)*inkr_distance  * np.cos(phi_Vektor[s])
+    #             y0 = (d-inkr_d)*inkr_distance  * np.sin(phi_Vektor[s])
 
 
+    #             x1 = np.round( x0 + d_max*np.sin(phi_Vektor[s]))
+    #             y1 = np.round( y0 + d_max*np.cos(phi_Vektor[s]))
 
-                origImg = Image.new("RGB", (inkr_d*2,inkr_phi))
-                origImg = Image.new("RGB", (width,height))
+    #             x2 = np.round( x0 - d_max*np.sin(phi_Vektor[s]))
+    #             y2 = np.round( y0 - d_max*np.cos(phi_Vektor[s]))
 
 
-                redImg = ImageDraw.Draw(origImg)
-                redImg.line(((x1,y1),(x2,y2)), fill="red", width = 4 )
-                origImg.show()
+
+    #             origImg = Image.new("RGB", (inkr_d*2,inkr_phi))
+    #             origImg = Image.new("RGB", (width,height))
+
+
+    #             redImg = ImageDraw.Draw(origImg)
+    #             redImg.line(((x1,y1),(x2,y2)), fill="red", width = 4 )
+    #             origImg.show()
 
 
 
