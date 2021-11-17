@@ -114,7 +114,7 @@ def Sobelfilter():
 
 
 def Houghtrans(Arr):                     #xcos(phi) + ysin(phi) = d
-    inkr_phi = 600         
+    inkr_phi = 1200         
     inkr_phi_distance = (180/inkr_phi) 
     phi_Vektor= np.zeros((inkr_phi))
     phi = -90
@@ -125,7 +125,7 @@ def Houghtrans(Arr):                     #xcos(phi) + ysin(phi) = d
     
     #phi_testvekt = np.linspace(0,  180/inkr_phi, num = inkr_phi)
 
-    inkr_d = 300
+    inkr_d = 600
     d_max = np.hypot(height,width)       #x-Achse: d  |  y-Achse: phi  ???muss hier height -1 und width -1 gewählt werden?
     inkr_distance = d_max/ inkr_d
 
@@ -201,14 +201,14 @@ def Houghtrans(Arr):                     #xcos(phi) + ysin(phi) = d
 
     for phi in range(0,inkr_phi):
         for d in range(0,(inkr_d*2)):
-            if(hRoom[phi][d] >= 100):
+            if(hRoom[phi][d] >= 65):
                 peakval = hRoom[phi][d]
                 peaks = peaks + [[phi,d,peakval]]
                 
 
 
 
-    suchradius = 12
+    suchradius = 6
     localmax = [-1,-1]
     localmaxVal = -1
     for r in range(0,len(peaks)):
@@ -255,7 +255,8 @@ def showLines(peakArr, inkr_d, inkr_distance, d_max, phi_Vektor, inkr_phi):
     origImg = Image.new("RGB", (width,height))
     redImg = ImageDraw.Draw(colImg)
 
-    for phitemp,dtemp in peakArr:
+    for phitemp,dtemp in peakArr:               #
+
         x0 = (dtemp-inkr_d)*inkr_distance  * np.cos(phi_Vektor[phitemp])
         y0 = (dtemp-inkr_d)*inkr_distance  * np.sin(phi_Vektor[phitemp])
 
