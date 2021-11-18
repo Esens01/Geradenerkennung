@@ -17,7 +17,7 @@ horizontal_filter = np.array(
 
 #path = "C:/Users/hilde/source/repos/Sobel_1/5x10_l-shape.png"
 #path = r"C:\Users\sebas\OneDrive - Technische Hochschule Nürnberg Georg Simon Ohm\Desktop\TH-Nürnberg\Sem3\Sim\Geradenerkennung\100x100_blacksq.png" 
-path = r"C:\Users\Sebastian\OneDrive - Technische Hochschule Nürnberg Georg Simon Ohm\Desktop\TH-Nürnberg\Sem3\Sim\Geradenerkennung\100x100_blacktri.png"
+path = r"C:\Users\Sebastian\OneDrive - Technische Hochschule Nürnberg Georg Simon Ohm\Desktop\TH-Nürnberg\Sem3\Sim\Geradenerkennung\Hochhaus.jfif"
 #path = "C:/Users/hilde/source/repos/Sobel_1/sw_Quadrat-voll.jpg"
 #path = "C:/Users/hilde/source/repos/Sobel_1/Ohm.png"
 
@@ -208,7 +208,7 @@ def Houghtrans(Arr):                     #xcos(phi) + ysin(phi) = d
 
 
 
-    suchradius = 6
+    suchradius = 10
     localmax = [-1,-1]
     localmaxVal = -1
     for r in range(0,len(peaks)):
@@ -255,17 +255,19 @@ def showLines(peakArr, inkr_d, inkr_distance, d_max, phi_Vektor, inkr_phi):
     origImg = Image.new("RGB", (width,height))
     redImg = ImageDraw.Draw(colImg)
 
-    for phitemp,dtemp in peakArr:               #
+    for phitemp,dtemp in peakArr:               #-> Formeln überprüfen!!!
 
         x0 = (dtemp-inkr_d)*inkr_distance  * np.cos(phi_Vektor[phitemp])
         y0 = (dtemp-inkr_d)*inkr_distance  * np.sin(phi_Vektor[phitemp])
 
 
         x1 = np.round( x0 + d_max*np.sin(phi_Vektor[phitemp]))
-        y1 = np.round( y0 + d_max*np.cos(phi_Vektor[phitemp]))
+        y1 = np.round( y0 + d_max*np.cos(phi_Vektor[phitemp])*(-1))
+
 
         x2 = np.round( x0 - d_max*np.sin(phi_Vektor[phitemp]))
-        y2 = np.round( y0 - d_max*np.cos(phi_Vektor[phitemp]))
+        y2 = np.round( y0 - d_max*np.cos(phi_Vektor[phitemp])*(-1)) 
+
 
 
 
